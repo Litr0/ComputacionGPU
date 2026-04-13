@@ -39,3 +39,10 @@
 
 # debug information files
 *.dwo
+
+# Ignorar configuraciones locales de CLion
+.idea/
+
+# Ignorar archivos de construcción de CMake
+cmake-build-*/
+build/
