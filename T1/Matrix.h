@@ -1,9 +1,11 @@
+#ifndef T1_MATRIX_H
+#define T1_MATRIX_H
+
 #include <cstddef>
+#include <iosfwd>
 #include <memory>
-#include <ostream>
 #include <string>
 #include <tuple>
-#include <fstream>
 
 class Matrix {
 private:
@@ -30,7 +32,7 @@ public:
     void fill(double value);   // Fill all the matrix with a value
 
 // Dimensions
-    std::tuple<int, int> size() const;  // Returns a list of the size of the
+    [[nodiscard]] std::tuple<int, int> size() const;  // Returns a list of the size of the
     // matrix, e.g. [2,4], 2 rows, 4 columns
 
 // Utilitary functions
@@ -45,9 +47,13 @@ public:
 
 // Mathematical operation
     Matrix &operator=(const Matrix &matrix);   // Assignment operator (copy)
-    Matrix &operator*=(const Matrix &matrix);  // Multiplication
+    Matrix operator+(const Matrix &matrix) const;  // Add and return new matrix
     Matrix &operator*=(double a);              // Multiply by a constant
     Matrix &operator+=(const Matrix &matrix);  // Add
+    Matrix operator-(const Matrix &matrix) const;  // Subtract and return new matrix
     Matrix &operator-=(const Matrix &matrix);  // Subtract
     Matrix &transpose();                       // Transpose the matrix
 };
+
+#endif  // T1_MATRIX_H
+
