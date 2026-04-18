@@ -46,3 +46,6 @@
 # Ignorar archivos de construcción de CMake
 cmake-build-*/
 build/
+
+# Local learning report (not versioned)
+IMPLEMENTACION.md
