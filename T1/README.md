@@ -12,7 +12,7 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
-Si quieres ejecutar el ejemplo:
+Ejecución de ejemplo:
 
 ```bash
 ./build/example
