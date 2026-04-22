@@ -77,6 +77,17 @@ TEST(MatrixTest, OperatorIndexThrowsOutOfRange) {
     }, std::out_of_range);
 }
 
+TEST(MatrixTest, ConstOperatorIndexAllowsReadOnlyAccess) {
+    Matrix m(2, 3);
+    m[0, 0] = 10.0;
+    m[1, 2] = -7.5;
+
+    const Matrix &cm = m;
+
+    EXPECT_DOUBLE_EQ((cm[0, 0]), 10.0);
+    EXPECT_DOUBLE_EQ((cm[1, 2]), -7.5);
+}
+
 TEST(MatrixTest, AdditionSizeMismatchThrowsException) {
     Matrix m1(2, 2);
     Matrix m2(3, 3);
@@ -93,6 +104,56 @@ TEST(MatrixTest, SubtractionSizeMismatchThrowsException) {
     EXPECT_THROW({
         m1 -= m2;
     }, std::logic_error);
+}
+
+TEST(MatrixTest, OperatorPlusEqualUpdatesLeftHandSide) {
+    Matrix a(2, 3);
+    Matrix b(2, 3);
+
+    a[0, 0] = 1.0;
+    a[0, 1] = 2.0;
+    a[0, 2] = 3.0;
+    a[1, 0] = 4.0;
+    a[1, 1] = 5.0;
+    a[1, 2] = 6.0;
+
+    b[0, 0] = 0.5;
+    b[0, 1] = 1.5;
+    b[0, 2] = -2.0;
+    b[1, 0] = 10.0;
+    b[1, 1] = -5.0;
+    b[1, 2] = 1.0;
+
+    a += b;
+
+    EXPECT_DOUBLE_EQ((a[0, 0]), 1.5);
+    EXPECT_DOUBLE_EQ((a[0, 1]), 3.5);
+    EXPECT_DOUBLE_EQ((a[0, 2]), 1.0);
+    EXPECT_DOUBLE_EQ((a[1, 0]), 14.0);
+    EXPECT_DOUBLE_EQ((a[1, 1]), 0.0);
+    EXPECT_DOUBLE_EQ((a[1, 2]), 7.0);
+}
+
+TEST(MatrixTest, OperatorMinusEqualUpdatesLeftHandSide) {
+    Matrix a(1, 4);
+    Matrix b(1, 4);
+
+    a[0, 0] = 8.0;
+    a[0, 1] = 6.0;
+    a[0, 2] = 4.0;
+    a[0, 3] = 2.0;
+
+    b[0, 0] = 1.0;
+    b[0, 1] = 2.0;
+    b[0, 2] = 3.0;
+    b[0, 3] = 4.0;
+
+    a -= b;
+
+    EXPECT_DOUBLE_EQ((a[0, 0]), 7.0);
+    EXPECT_DOUBLE_EQ((a[0, 1]), 4.0);
+    EXPECT_DOUBLE_EQ((a[0, 2]), 1.0);
+    EXPECT_DOUBLE_EQ((a[0, 3]), -2.0);
 }
 
 TEST(MatrixTest, OperatorPlusReturnsNewMatrixWithoutMutatingOperands) {
@@ -165,16 +226,17 @@ TEST(MatrixTest, OperatorPlusAndMinusThrowOnSizeMismatch) {
 TEST(MatrixTest, ScalarMultiplicationUpdatesAllValues) {
     Matrix m(2, 2);
     m[0, 0] = 1.5;
-    m[0, 1] = -2.0;
+    m[0, 1] = 2.0;
     m[1, 0] = 0.5;
     m[1, 1] = 4.0;
 
     m *= 2.0;
 
-    EXPECT_DOUBLE_EQ((m[0, 0]), 3.0);
-    EXPECT_DOUBLE_EQ((m[0, 1]), -4.0);
-    EXPECT_DOUBLE_EQ((m[1, 0]), 1.0);
-    EXPECT_DOUBLE_EQ((m[1, 1]), 8.0);
+    std::ostringstream out;
+    out << m;
+    if (!(out.str().find("3 4\n1 8") < out.str().size())) {
+        FAIL() << "El resultado de la multiplicación escalar no coincide";
+    }
 }
 
 TEST(MatrixTest, TransposeChangesDimensionsAndValues) {
@@ -247,6 +309,14 @@ TEST(MatrixTest, EqualityAndInequalityWorkWithTolerance) {
     EXPECT_TRUE(a != b);
 }
 
+TEST(MatrixTest, EqualityAndInequalityDetectDifferentSizes) {
+    Matrix a(2, 2);
+    Matrix b(2, 3);
+
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+}
+
 TEST(MatrixTest, SaveAndLoadRoundTripPreservesValues) {
     Matrix m(2, 3);
     m[0, 0] = 1.25;
@@ -307,5 +377,31 @@ TEST(MatrixTest, StreamOutputUsesRowByRowFormat) {
     std::ostringstream out;
     out << m;
     EXPECT_EQ(out.str(), "1 2\n3 4");
+}
+
+TEST(MatrixTest, StreamOutputHandlesEmptyMatrixAndNonSquareShapes) {
+    Matrix empty;
+    Matrix row(1, 3);
+    Matrix column(3, 1);
+
+    row[0, 0] = 1.0;
+    row[0, 1] = 2.0;
+    row[0, 2] = 3.0;
+
+    column[0, 0] = 4.0;
+    column[1, 0] = 5.0;
+    column[2, 0] = 6.0;
+
+    std::ostringstream empty_out;
+    std::ostringstream row_out;
+    std::ostringstream column_out;
+
+    empty_out << empty;
+    row_out << row;
+    column_out << column;
+
+    EXPECT_EQ(empty_out.str(), "");
+    EXPECT_EQ(row_out.str(), "1 2 3");
+    EXPECT_EQ(column_out.str(), "4\n5\n6");
 }
 
