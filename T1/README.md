@@ -4,7 +4,9 @@ La clase `Matrix` almacena y manipula valores de tipo `double`.
 
 ## Compilar y ejecutar
 
-Este proyecto usa C++23 y Google Test por CMake.
+Este proyecto usa C++23, Google Test por CMake y desarrollado en Ubuntu.
+
+Ejecución de comandos para compilar y correr tests:
 
 ```bash
 cmake -S . -B build
