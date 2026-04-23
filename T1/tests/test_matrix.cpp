@@ -1,8 +1,10 @@
 #include <gtest/gtest.h>
 #include "../Matrix.h"
 
+#include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <limits>
 #include <sstream>
 
 namespace {
@@ -237,6 +239,57 @@ TEST(MatrixTest, ScalarMultiplicationUpdatesAllValues) {
     if (!(out.str().find("3 4\n1 8") < out.str().size())) {
         FAIL() << "El resultado de la multiplicación escalar no coincide";
     }
+}
+
+TEST(MatrixTest, ScalarMultiplicationWithIntegerLiteralPreservesFractions) {
+    Matrix m(2, 2);
+    m[0, 0] = 1.25;
+    m[0, 1] = -0.5;
+    m[1, 0] = 3.75;
+    m[1, 1] = -2.125;
+
+    m *= 2;
+
+    EXPECT_DOUBLE_EQ((m[0, 0]), 2.5);
+    EXPECT_DOUBLE_EQ((m[0, 1]), -1.0);
+    EXPECT_DOUBLE_EQ((m[1, 0]), 7.5);
+    EXPECT_DOUBLE_EQ((m[1, 1]), -4.25);
+}
+
+TEST(MatrixTest, VeryLargeAndVerySmallValuesStayFiniteWithinRange) {
+    Matrix m(2, 2);
+    const double large = std::ldexp(1.0, 900);
+    const double small = std::ldexp(1.0, -900);
+
+    m[0, 0] = large;
+    m[0, 1] = -large;
+    m[1, 0] = small;
+    m[1, 1] = -small;
+
+    m *= 0.5;
+
+    EXPECT_TRUE(std::isfinite((m[0, 0])));
+    EXPECT_TRUE(std::isfinite((m[0, 1])));
+    EXPECT_TRUE(std::isfinite((m[1, 0])));
+    EXPECT_TRUE(std::isfinite((m[1, 1])));
+
+    EXPECT_DOUBLE_EQ((m[0, 0]), std::ldexp(1.0, 899));
+    EXPECT_DOUBLE_EQ((m[0, 1]), -std::ldexp(1.0, 899));
+    EXPECT_DOUBLE_EQ((m[1, 0]), std::ldexp(1.0, -901));
+    EXPECT_DOUBLE_EQ((m[1, 1]), -std::ldexp(1.0, -901));
+}
+
+TEST(MatrixTest, PrimeDenominatorFractionsRequireTolerance) {
+    Matrix m(1, 2);
+    m[0, 0] = 1.0 / 7.0;
+    m[0, 1] = 1.0 / 13.0;
+
+    Matrix scaled = m;
+    scaled *= 7.0;
+
+    EXPECT_NEAR((scaled[0, 0]), 1.0, 1e-15);
+    EXPECT_NEAR((scaled[0, 1]), 7.0 / 13.0, 1e-15);
+    EXPECT_TRUE(m != scaled);
 }
 
 TEST(MatrixTest, TransposeChangesDimensionsAndValues) {
