@@ -49,3 +49,6 @@ build/
 
 # Local learning report (not versioned)
 IMPLEMENTACION.md
+
+# Ignorar archivos .zip
+*.zip
