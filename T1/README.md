@@ -1,4 +1,6 @@
 # Tarea 1 - Matrix (C++23)
+## Integrante:
+   - Gonzalo Sobarzo
 
 La clase `Matrix` almacena y manipula valores de tipo `double`.
 
