@@ -18,4 +18,4 @@ struct BenchmarkResult {
 };
 
 
-#endif //TAREA_2_CC7515_COMMON_H
+#endif //TAREA_3_CC7515_COMMON_H
