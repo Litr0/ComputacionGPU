@@ -4,7 +4,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <cuda_runtime.h>
-#include <cuda_gl_interop.h> // Cabecera esencial para el mapeo GPU-GPU
+#include <cuda_gl_interop.h>
 #include <iostream>
 #include <vector>
 #include <cstdlib>
@@ -30,12 +30,11 @@ ubyte* d_resultData = nullptr;
 
 // Función de inicialización de entornos gráficos
 void initGraphics() {
+    // Inicializar el sistema de ventanas GLFW
     if (!glfwInit()) {
         std::cerr << "Error: No se pudo inicializar GLFW" << std::endl;
         exit(EXIT_FAILURE);
     }
-
-    glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
 
     window = glfwCreateWindow(WIDTH, HEIGHT, "CC7515 - Tarea 3: Interop CUDA-OpenGL", NULL, NULL);
     if (!window) {
@@ -48,7 +47,6 @@ void initGraphics() {
 
     // Inicializar GLEW para cargar los entrypoints de extensiones modernas de OpenGL
     glewExperimental = GL_TRUE;
-
     GLenum err = glewInit();
     if (GLEW_OK != err) {
         std::cerr << "Error al inicializar GLEW: " << glewGetErrorString(err) << std::endl;
@@ -71,9 +69,13 @@ void initGraphics() {
     // 3. Crear y configurar la textura encargada de mapear el PBO a la pantalla
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
+
     // Filtros NEAREST para que los píxeles (células) se vean nítidos al escalar
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // Esto permite que 'glTexSubImage2D' en el bucle principal tenga un contenedor real que actualizar.
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, WIDTH, HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
     // Desenlazar buffers por seguridad
     glBindTexture(GL_TEXTURE_2D, 0);
